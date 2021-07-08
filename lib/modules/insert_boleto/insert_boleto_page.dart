@@ -8,8 +8,11 @@ import 'package:payflow/shared/widgets/input_text/input_text_widget.dart';
 import 'package:payflow/shared/widgets/set_label_buttons/set_label_buttons.dart';
 
 class InsertBoletoPage extends StatefulWidget {
-  final String ? barcode;
-  const InsertBoletoPage({Key? key, this.barcode}) : super(key: key);
+  final String? barcode;
+  const InsertBoletoPage({
+    Key? key,
+    this.barcode,
+  }) : super(key: key);
 
   @override
   _InsertBoletoPageState createState() => _InsertBoletoPageState();
@@ -19,16 +22,16 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
   final controller = InsertBoletoController();
 
   final moneyInputTextController = MoneyMaskedTextController(
-    leftSymbol: "R\$",
-    decimalSeparator: ","
-  );
-  final dueDateInputTextController = MaskedTextController(mask: "00/00/0000");
-  final barcodeInputTextController = TextEditingController();
+      leftSymbol: "R\$", initialValue: 0, decimalSeparator: ",");
+  final vencimentoInputTextController =
+      MaskedTextController(mask: "00/00/0000");
+  final codigoInputTextController = TextEditingController();
 
   @override
   void initState() {
-    if( widget.barcode != null)
-      barcodeInputTextController.text = widget.barcode!;
+    if (widget.barcode != null) {
+      codigoInputTextController.text = widget.barcode!;
+    }
     super.initState();
   }
 
@@ -37,78 +40,97 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
         elevation: 0,
-        leading: BackButton(color: AppColors.input,),
-      ), 
+        backgroundColor: AppColors.background,
+        leading: BackButton(
+          color: AppColors.input,
+        ),
+      ),
       body: SingleChildScrollView(
-              child: Padding(
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 93),
-                child: Text("Preencha os dados do boleto",
-                style: TextStyles.titleBoldHeading,
-                textAlign: TextAlign.center,)
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 93, vertical: 24),
+                child: Text(
+                  "Preencha os dados do boleto",
+                  style: TextStyles.titleBoldHeading,
+                  textAlign: TextAlign.center,
+                ),
               ),
               Form(
                 key: controller.formKey,
                 child: Column(
-                children: [
-                  InputTextWidget(
-                label: "Nome do boleto",
-                icon: Icons.description_outlined,
-                onChanged: (value) {
-                  controller.onChange(name: value);
-                },
-                validator: controller.validateName,
-              ),
-              InputTextWidget(
-                controller: dueDateInputTextController,
-                label: "Vencimento",
-                icon: FontAwesomeIcons.timesCircle,
-                onChanged: (value) {
-                  controller.onChange(dueDate: value);
-                },
-                validator: controller.validateVencimento,
-              ),
-              InputTextWidget(
-                controller: moneyInputTextController,
-                label: "Valor",
-                icon: FontAwesomeIcons.wallet,
-                onChanged: (value) {
-                  controller.onChange(value: moneyInputTextController.numberValue);
-                },
-                validator: (_) => controller.validateValor(moneyInputTextController.numberValue),
-              ),
-              InputTextWidget(
-                controller: barcodeInputTextController,
-                label: "Código",
-                icon: FontAwesomeIcons.barcode,
-                onChanged: (value) {
-                  controller.onChange(barcode: value);
-                },
-                validator: controller.validateCodigo,
-              ),
-                ],
-              ),)
+                  children: [
+                    InputTextWidget(
+                      label: "Nome do boleto",
+                      icon: Icons.description_outlined,
+                      onChanged: (value) {
+                        controller.onChange(name: value);
+                      },
+                      validator: controller.validateName,
+                    ),
+                    InputTextWidget(
+                      controller: vencimentoInputTextController,
+                      label: "Vencimento",
+                      icon: FontAwesomeIcons.timesCircle,
+                      onChanged: (value) {
+                        controller.onChange(dueDate: value);
+                      },
+                      validator: controller.validateVencimento,
+                    ),
+                    InputTextWidget(
+                      controller: moneyInputTextController,
+                      label: "Valor",
+                      icon: FontAwesomeIcons.wallet,
+                      validator: (_) => controller
+                          .validateValor(moneyInputTextController.numberValue),
+                      onChanged: (value) {
+                        controller.onChange(
+                            value: moneyInputTextController.numberValue);
+                      },
+                    ),
+                    InputTextWidget(
+                      controller: codigoInputTextController,
+                      label: "Código",
+                      icon: FontAwesomeIcons.barcode,
+                      validator: controller.validateCodigo,
+                      onChanged: (value) {
+                        controller.onChange(barcode: value);
+                      },
+                    )
+                  ],
+                ),
+              )
             ],
           ),
         ),
       ),
-      bottomNavigationBar: SetLabelButtons(
-        enableSecondaryColor: true,
-        labelPrimary: "Cancelar", 
-        onTapPrimary: () {
-          Navigator.pop(context);
-        }, 
-        labelSecondary: "Cadastrar", 
-        onTapSecondary: () async {
-          await controller.cadastrarBoleto();
-          Navigator.pop(context);
-        }),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: AppColors.stroke,
+          ),
+          SetLabelButtons(
+            enableSecondaryColor: true,
+            labelPrimary: "Cancelar",
+            onTapPrimary: () {
+              Navigator.pop(context);
+            },
+            labelSecondary: "Cadastrar",
+            onTapSecondary: () async {
+              await controller.cadastrar();
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
     );
   }
 }
